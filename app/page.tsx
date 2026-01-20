@@ -4,21 +4,22 @@ import { Box } from "@mui/material";
 import Sidebar from "@/components/Sidebar";
 import ChatArea from "@/components/ChatArea";
 import { Chat, loadChats, saveChats, clearChats } from "@/lib/storage";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 
 export default function Page() {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [currentId, setCurrentId] = useState("");
-
-  useEffect(() => {
+  // 1️⃣ Lazy init state → fără warning React
+  const [chats, setChats] = useState<Chat[]>(() => {
     const loaded = loadChats();
-    if (loaded.length) {
-      setChats(loaded);
-      setCurrentId(loaded[0].id);
-    } else newChat();
-  }, []);
+    return loaded.length ? loaded : [];
+  });
 
+  const [currentId, setCurrentId] = useState(() => {
+    const loaded = loadChats();
+    return loaded.length ? loaded[0].id : "";
+  });
+
+  // 2️⃣ Functia pentru creare chat nou
   const newChat = () => {
     const chat: Chat = {
       id: uuid(),
@@ -31,12 +32,22 @@ export default function Page() {
     saveChats(updated);
   };
 
+  // 3️⃣ Daca nu avem niciun chat la mount, cream unul
+  useEffect(() => {
+    if (chats.length === 0) {
+      newChat();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 4️⃣ Functia pentru update chat
   const updateChat = (chat: Chat) => {
     const updated = chats.map(c => (c.id === chat.id ? chat : c));
     setChats(updated);
     saveChats(updated);
   };
 
+  // 5️⃣ Functia Clear All
   const handleClear = () => {
     clearChats();
     setChats([]);

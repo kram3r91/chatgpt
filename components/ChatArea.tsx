@@ -4,7 +4,7 @@ import { Box, IconButton, TextField } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import MessageBubble from "./MessageBubble";
 import { Chat, saveChats } from "@/lib/storage";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function userMessage(content: string) {
   return { role: "user", content } as const;
@@ -23,6 +23,16 @@ export default function ChatArea({
   updateChat: (chat: Chat) => void;
 }) {
   const [input, setInput] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chat.messages]);
 
   const send = async () => {
     if (!input.trim()) return;
@@ -74,6 +84,7 @@ export default function ChatArea({
         {chat.messages.map((m, i) => (
           <MessageBubble key={i} message={m} />
         ))}
+        <div ref={messagesEndRef} />
       </Box>
 
       <Box p={1} display="flex" gap={1} sx={{ flexShrink: 0 }}>
