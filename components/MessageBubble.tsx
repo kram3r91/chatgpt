@@ -4,6 +4,15 @@ import { Box, Paper } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "@/lib/storage";
+import { ReactNode } from "react";
+
+// Tip strict pentru componente Markdown custom
+type MarkdownComponentProps = {
+  children?: ReactNode;
+  className?: string;
+  inline?: boolean;
+  [key: string]: unknown; // alte props HTML
+};
 
 export default function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
@@ -27,38 +36,40 @@ export default function MessageBubble({ message }: { message: Message }) {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            h1: ({ node, ...props }) => (
+            h1: ({ node, ...props }: MarkdownComponentProps) => (
               <Box
                 component="h1"
                 sx={{ fontSize: "1.5rem", fontWeight: "bold", my: 1 }}
                 {...props}
               />
             ),
-            h2: ({ node, ...props }) => (
+            h2: ({ node, ...props }: MarkdownComponentProps) => (
               <Box
                 component="h2"
                 sx={{ fontSize: "1.3rem", fontWeight: "bold", my: 0.8 }}
                 {...props}
               />
             ),
-            strong: ({ node, ...props }) => (
+            strong: ({ node, ...props }: MarkdownComponentProps) => (
               <Box
                 component="span"
                 sx={{ fontWeight: "bold", color: "#10a37f" }}
                 {...props}
               />
             ),
-            em: ({ node, ...props }) => (
+            em: ({ node, ...props }: MarkdownComponentProps) => (
               <Box
                 component="span"
                 sx={{ fontStyle: "italic", color: "#bbb" }}
                 {...props}
               />
             ),
-            li: ({ node, ...props }) => (
+            li: ({ node, ...props }: MarkdownComponentProps) => (
               <li style={{ marginBottom: 4 }} {...props} />
             ),
-            code: ({ node, inline, className, children, ...props }) => (
+
+            // Code și Pre – TS safe, fără any
+            code: ({ children, ...props }: MarkdownComponentProps) => (
               <Box
                 component="code"
                 sx={{
@@ -74,7 +85,7 @@ export default function MessageBubble({ message }: { message: Message }) {
                 {children}
               </Box>
             ),
-            pre: ({ node, ...props }) => (
+            pre: ({ children, ...props }: MarkdownComponentProps) => (
               <Box
                 component="pre"
                 sx={{
@@ -85,7 +96,9 @@ export default function MessageBubble({ message }: { message: Message }) {
                   overflowX: "auto",
                 }}
                 {...props}
-              />
+              >
+                {children}
+              </Box>
             ),
           }}
         >
