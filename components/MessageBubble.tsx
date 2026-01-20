@@ -1,17 +1,86 @@
 "use client";
 
 import { Box, Paper } from "@mui/material";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "@/lib/storage";
-import { ReactNode } from "react";
 
-// Tip strict pentru componente Markdown custom
-type MarkdownComponentProps = {
-  children?: ReactNode;
-  className?: string;
-  inline?: boolean;
-  [key: string]: unknown; // alte props HTML
+// Folosim tipurile oficiale Components pentru TS strict
+const markdownComponents: Components = {
+  h1: ({ children, ...props }) => (
+    <Box
+      component="h1"
+      sx={{ fontSize: "1.5rem", fontWeight: "bold", my: 1 }}
+      {...props}
+    >
+      {children}
+    </Box>
+  ),
+  h2: ({ children, ...props }) => (
+    <Box
+      component="h2"
+      sx={{ fontSize: "1.3rem", fontWeight: "bold", my: 0.8 }}
+      {...props}
+    >
+      {children}
+    </Box>
+  ),
+  strong: ({ children, ...props }) => (
+    <Box
+      component="span"
+      sx={{ fontWeight: "bold", color: "#10a37f" }}
+      {...props}
+    >
+      {children}
+    </Box>
+  ),
+  em: ({ children, ...props }) => (
+    <Box
+      component="span"
+      sx={{ fontStyle: "italic", color: "#bbb" }}
+      {...props}
+    >
+      {children}
+    </Box>
+  ),
+  li: ({ children, ...props }) => (
+    <li style={{ marginBottom: 4 }} {...props}>
+      {children}
+    </li>
+  ),
+
+  // code & pre – singura excepție unde folosim any, deoarece react-markdown nu oferă tip exact
+  code: props => (
+    <Box
+      component="code"
+      sx={{
+        bgcolor: "#2e2e2e",
+        color: "#10a37f",
+        p: 0.5,
+        borderRadius: 1,
+        fontFamily: "monospace",
+        fontSize: "0.9rem",
+      }}
+      {...props}
+    >
+      {props.children}
+    </Box>
+  ),
+  pre: props => (
+    <Box
+      component="pre"
+      sx={{
+        bgcolor: "#1a1a1a",
+        color: "#ddd",
+        p: 1,
+        borderRadius: 1,
+        overflowX: "auto",
+      }}
+      {...props}
+    >
+      {props.children}
+    </Box>
+  ),
 };
 
 export default function MessageBubble({ message }: { message: Message }) {
@@ -35,72 +104,7 @@ export default function MessageBubble({ message }: { message: Message }) {
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          components={{
-            h1: ({ node, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="h1"
-                sx={{ fontSize: "1.5rem", fontWeight: "bold", my: 1 }}
-                {...props}
-              />
-            ),
-            h2: ({ node, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="h2"
-                sx={{ fontSize: "1.3rem", fontWeight: "bold", my: 0.8 }}
-                {...props}
-              />
-            ),
-            strong: ({ node, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="span"
-                sx={{ fontWeight: "bold", color: "#10a37f" }}
-                {...props}
-              />
-            ),
-            em: ({ node, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="span"
-                sx={{ fontStyle: "italic", color: "#bbb" }}
-                {...props}
-              />
-            ),
-            li: ({ node, ...props }: MarkdownComponentProps) => (
-              <li style={{ marginBottom: 4 }} {...props} />
-            ),
-
-            // Code și Pre – TS safe, fără any
-            code: ({ children, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="code"
-                sx={{
-                  bgcolor: "#2e2e2e",
-                  color: "#10a37f",
-                  p: 0.5,
-                  borderRadius: 1,
-                  fontFamily: "monospace",
-                  fontSize: "0.9rem",
-                }}
-                {...props}
-              >
-                {children}
-              </Box>
-            ),
-            pre: ({ children, ...props }: MarkdownComponentProps) => (
-              <Box
-                component="pre"
-                sx={{
-                  bgcolor: "#1a1a1a",
-                  color: "#ddd",
-                  p: 1,
-                  borderRadius: 1,
-                  overflowX: "auto",
-                }}
-                {...props}
-              >
-                {children}
-              </Box>
-            ),
-          }}
+          components={markdownComponents}
         >
           {message.content}
         </ReactMarkdown>
