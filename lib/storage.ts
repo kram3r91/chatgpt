@@ -9,7 +9,7 @@ export type Chat = {
   messages: Message[];
 };
 
-const KEY = "chatgpt-chats";
+const KEY = "my-chatgpt-chats";
 
 export function loadChats(): Chat[] {
   if (typeof window === "undefined") return [];
@@ -18,4 +18,8 @@ export function loadChats(): Chat[] {
 
 export function saveChats(chats: Chat[]) {
   localStorage.setItem(KEY, JSON.stringify(chats));
+}
+
+export function clearChats() {
+  localStorage.removeItem(KEY);
 }

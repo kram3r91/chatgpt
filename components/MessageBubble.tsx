@@ -5,12 +5,17 @@ export default function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
 
   return (
-    <Box display="flex" justifyContent={isUser ? "flex-end" : "flex-start"}>
+    <Box
+      display="flex"
+      justifyContent={isUser ? "flex-end" : "flex-start"}
+      mb={1}
+    >
       <Paper
         sx={{
-          p: 2,
+          p: 1.5,
           maxWidth: "70%",
           bgcolor: isUser ? "primary.main" : "background.paper",
+          wordBreak: "break-word",
         }}
       >
         {message.content}
