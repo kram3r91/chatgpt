@@ -3,23 +3,15 @@
 import { Box } from "@mui/material";
 import Sidebar from "@/components/Sidebar";
 import ChatArea from "@/components/ChatArea";
-import { Chat, loadChats, saveChats, clearChats } from "@/lib/storage";
+import { Chat, saveChats, clearChats } from "@/lib/storage";
 import { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 
 export default function Page() {
-  // 1️⃣ Lazy init state → fără warning React
-  const [chats, setChats] = useState<Chat[]>(() => {
-    const loaded = loadChats();
-    return loaded.length ? loaded : [];
-  });
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentId, setCurrentId] = useState("");
 
-  const [currentId, setCurrentId] = useState(() => {
-    const loaded = loadChats();
-    return loaded.length ? loaded[0].id : "";
-  });
-
-  // 2️⃣ Functia pentru creare chat nou
+  // 1️⃣ Functia pentru creare chat nou
   const newChat = () => {
     const chat: Chat = {
       id: uuid(),
@@ -32,31 +24,42 @@ export default function Page() {
     saveChats(updated);
   };
 
-  // 3️⃣ Daca nu avem niciun chat la mount, cream unul
+  // 2️⃣ Încarcă chat-uri doar pe client
   useEffect(() => {
-    if (chats.length === 0) {
+    const loaded = JSON.parse(localStorage.getItem("my-chatgpt-chats") || "[]");
+    if (loaded.length) {
+      setChats(loaded);
+      setCurrentId(loaded[0].id);
+    } else {
       newChat();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 4️⃣ Functia pentru update chat
+  // 3️⃣ Functia pentru update chat
   const updateChat = (chat: Chat) => {
     const updated = chats.map(c => (c.id === chat.id ? chat : c));
     setChats(updated);
     saveChats(updated);
   };
 
-  // 5️⃣ Functia Clear All
+  // 4️⃣ Functia Clear All → șterge tot și creează un chat gol
   const handleClear = () => {
     clearChats();
-    setChats([]);
-    newChat();
+    const chat: Chat = {
+      id: uuid(),
+      title: "New Chat",
+      messages: [],
+    };
+    setChats([chat]);
+    setCurrentId(chat.id);
+    saveChats([chat]);
   };
 
   const current = chats.find(c => c.id === currentId);
   if (!current) return null;
 
+  // 5️⃣ Layout responsive
   return (
     <Box
       display="flex"
