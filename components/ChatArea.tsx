@@ -20,12 +20,12 @@ export default function ChatArea({
   const send = async () => {
     if (!input.trim()) return;
 
-    const updated = {
+    const updated: Chat = {
       ...chat,
       messages: [
         ...chat.messages,
-        { role: "user", content: input },
-        { role: "assistant", content: "" },
+        { role: "user", content: input } as const,
+        { role: "assistant", content: "" } as const,
       ],
     };
 
